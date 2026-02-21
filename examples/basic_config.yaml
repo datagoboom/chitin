@@ -1,0 +1,39 @@
+# Basic Configuration Example
+# Copy to .chitin/config.yaml and customize
+
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-20250514
+  max_tokens: 8192
+  # API key from environment: ANTHROPIC_API_KEY
+
+mcp_servers:
+  - name: filesystem
+    transport: stdio
+    command: ["npx", "@modelcontextprotocol/server-filesystem", "."]
+
+tool_defaults:
+  unknown_risk: medium
+
+escalation:
+  handler: terminal
+  timeout_seconds: 300
+
+policy:
+  enterprise_url: null
+  refresh_interval_seconds: 60
+  agent_id: null
+  agent_tags: []
+
+api:
+  enabled: false
+  bind: "127.0.0.1:4830"
+
+chitin:
+  # Native library is preferred and should be found automatically from the wheel
+  # Only set these if needed:
+  # lib_path: "/path/to/libchitin.so"  # Override path to native library
+  # sidecar_url: "http://localhost:8080"  # Use sidecar instead (not recommended if wheel has library)
+  # 
+  # To use native library (default): leave both null or unset CHITIN_SIDECAR_URL
+  # To use sidecar: set sidecar_url or export CHITIN_SIDECAR_URL

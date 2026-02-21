@@ -147,9 +147,4 @@ class AnthropicAdapter(LLMAdapter):
             yield block
 
 
-def create_llm_adapter(config: LLMConfig) -> LLMAdapter:
-    """Create appropriate LLM adapter."""
-    if config.provider == "anthropic":
-        return AnthropicAdapter(config)
-    else:
-        raise ValueError(f"Unknown LLM provider: {config.provider}")
+# create_llm_adapter moved to chitin_agent.llm.__init__ to avoid circular imports

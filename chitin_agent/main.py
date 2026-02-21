@@ -70,14 +70,22 @@ async def run_session(config: AgentConfig) -> None:
         await policy_refresher.start()
 
     # Connect to MCP servers
+    # Ensure we have mcp_servers list (from either format)
+    if config.mcp_servers is None:
+        config.mcp_servers = []
+    
     mcp = MCPClient(config)
     try:
         await mcp.connect_all()
 
         # Register discovered tools with Chitin
-        for tool in mcp.list_all_tools():
+        all_tools = mcp.list_all_tools()
+        for tool in all_tools:
             risk, category = classify_tool(tool, tool_classifications, config.tool_defaults)
             session.engine.register_tool(tool.name, risk=risk, category=category)
+        
+        if len(all_tools) == 0:
+            print("Warning: No MCP tools discovered. Check MCP server connections.", file=sys.stderr)
 
         # Create LLM adapter
         llm = create_llm_adapter(config.llm)
@@ -92,7 +100,14 @@ async def run_session(config: AgentConfig) -> None:
 
         # Message history for LLM
         messages: list[dict[str, Any]] = []
-
+        
+        # Add system message about available tools if any
+        tool_count = len(mcp.list_all_tools())
+        if tool_count > 0:
+            tool_names = [t.name for t in mcp.list_all_tools()[:10]]  # First 10 tools
+            system_msg = f"You are a helpful AI assistant with access to {tool_count} MCP (Model Context Protocol) tools. Available tools include: {', '.join(tool_names)}. When users ask about MCP tools or capabilities, you can use these tools to help them."
+            messages.append({"role": "system", "content": system_msg})
+        
         print("Chitin Agent ready. Type your message (or 'exit' to quit):\n")
 
         # Main loop
@@ -116,7 +131,8 @@ async def run_session(config: AgentConfig) -> None:
                 # which get fed back, which may trigger more tool calls
                 while True:
                     # Get LLM response
-                    response = await llm.chat(messages, tools=mcp.tool_definitions())
+                    tool_defs = mcp.tool_definitions()
+                    response = await llm.chat(messages, tools=tool_defs)
 
                     # Process response and execute tool calls
                     text_content, tool_results = await executor.process_llm_response(response)
@@ -160,6 +176,9 @@ async def run_session(config: AgentConfig) -> None:
             await policy_server_client.disconnect()
 
         await mcp.disconnect_all()
+        # Close LLM adapter session if it has a close method
+        if hasattr(llm, "close"):
+            await llm.close()
         session_manager.close_session()
 
 

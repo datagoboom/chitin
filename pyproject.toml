@@ -13,7 +13,7 @@ authors = [
     {name = "Chitin Team"}
 ]
 dependencies = [
-    "chitin>=0.1.0",  # Python bindings from chitin-engine-lib
+    "chitin-engine-lib==0.1.2",  # Python bindings from chitin-engine-lib
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
     "pyyaml>=6.0",

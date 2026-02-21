@@ -1,0 +1,39 @@
+# Enterprise Configuration Example
+# For production deployments with Policy Server
+
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-20250514
+  max_tokens: 4096
+
+mcp_servers:
+  - name: filesystem
+    transport: stdio
+    command: ["npx", "@modelcontextprotocol/server-filesystem", "/allowed/path"]
+  - name: database
+    transport: http
+    url: "https://mcp-server.internal:443"
+
+tool_defaults:
+  unknown_risk: high  # Conservative default for production
+
+escalation:
+  handler: auto_deny  # No interactive prompts in production
+  timeout_seconds: 0
+
+policy:
+  enterprise_url: "https://policy-server.company.com"
+  agent_id: "prod-agent-${HOSTNAME}"  # Use environment variable
+  agent_tags: 
+    - "team:${TEAM_NAME}"
+    - "env:production"
+    - "region:${REGION}"
+  refresh_interval_seconds: 30  # More frequent refresh
+
+api:
+  enabled: true
+  bind: "127.0.0.1:4830"  # Only localhost in production
+
+chitin:
+  lib_path: "/opt/chitin/libchitin.so"
+  sidecar_url: null

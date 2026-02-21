@@ -1,0 +1,36 @@
+# Example Policy
+# Copy to .chitin/policies/example.yaml
+
+name: Example Security Policy
+description: Basic security rules for tool execution
+
+rules:
+  # Deny all critical risk tools
+  - name: Deny critical tools
+    condition:
+      tool_risk: critical
+    action: deny
+    reason: "Critical risk tools are not allowed"
+  
+  # Escalate high-risk filesystem writes
+  - name: Escalate filesystem writes
+    condition:
+      tool_category: filesystem
+      tool_risk: high
+    action: escalate
+    reason: "Filesystem writes require approval"
+  
+  # Allow low-risk operations
+  - name: Allow low-risk reads
+    condition:
+      tool_risk: low
+    action: allow
+    reason: "Low-risk operations are safe"
+  
+  # Deny network operations to untrusted domains
+  - name: Deny untrusted network
+    condition:
+      tool_category: network_outbound
+      # This would require trace analysis in real implementation
+    action: escalate
+    reason: "Network operations require review"

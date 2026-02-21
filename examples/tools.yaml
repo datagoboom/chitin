@@ -1,0 +1,57 @@
+# Tool Classifications Example
+# Copy to .chitin/tools.yaml
+
+tools:
+  # Filesystem operations
+  filesystem_read:
+    risk: low
+    category: filesystem
+  
+  filesystem_write:
+    risk: high
+    category: filesystem
+  
+  filesystem_list:
+    risk: low
+    category: filesystem
+  
+  # Network operations
+  http_fetch:
+    risk: high
+    category: network_outbound
+  
+  web_search:
+    risk: medium
+    category: network_outbound
+  
+  # Code execution
+  shell_exec:
+    risk: critical
+    category: code_exec
+  
+  python_exec:
+    risk: critical
+    category: code_exec
+  
+  # Database operations
+  database_query:
+    risk: medium
+    category: database
+  
+  database_write:
+    risk: high
+    category: database
+  
+  # AI/ML operations
+  llm_call:
+    risk: medium
+    category: ai_ml
+  
+  # File operations
+  file_read:
+    risk: low
+    category: filesystem
+  
+  file_write:
+    risk: high
+    category: filesystem

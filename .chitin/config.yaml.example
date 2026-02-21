@@ -1,41 +1,14 @@
-# Example configuration for chitin-agent
-# Copy this to .chitin/config.yaml and customize
-
-# LLM provider
+# Example configuration with Chitin sidecar
 llm:
-  provider: anthropic
-  model: claude-sonnet-4-20250514
+  provider: ollama
+  model: llama3
   max_tokens: 8192
-  # API key from environment: ANTHROPIC_API_KEY
 
-# MCP servers
-mcp_servers:
-  - name: filesystem
-    transport: stdio
-    command: ["npx", "@modelcontextprotocol/server-filesystem", "/path/to/allowed"]
+mcp_servers: []
 
-# Tool risk overrides (supplements .chitin/tools.yaml)
-tool_defaults:
-  unknown_risk: medium
-
-# Escalation
 escalation:
-  handler: terminal
-  timeout_seconds: 300
+  handler: auto_deny
+  timeout_seconds: 0
 
-# Policy
-policy:
-  enterprise_url: null
-  refresh_interval_seconds: 60
-  agent_id: null
-  agent_tags: []
-
-# Local API
-api:
-  enabled: false
-  bind: "127.0.0.1:4830"
-
-# Chitin engine
 chitin:
-  lib_path: null
-  sidecar_url: null
+  sidecar_url: "http://localhost:8080"

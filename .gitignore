@@ -32,13 +32,16 @@ ENV/
 *.swo
 *~
 
-# Chitin config (user-specific)
+# Chitin config (user-specific - should NOT be in repo)
 .chitin/config.yaml
+.chitin/config.yml
+.chitin/config.json
 .chitin/tools.yaml
 .chitin/policies/*.yaml
 
-# Keep example files
+# Keep example files (these SHOULD be in repo)
 !.chitin/*.example
+!.chitin/README.md
 
 # Testing
 .pytest_cache/
@@ -47,6 +50,15 @@ htmlcov/
 
 # Logs
 *.log
+
+# Local documentation (not in repo)
+local_docs/
+
+# Temporary/debug files (root level only)
+*.whl
+/debug*.py
+/test_*.py
+/show_*.md
 
 # misc
 IMPLEMENTATION_NOTES.md

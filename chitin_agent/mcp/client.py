@@ -77,6 +77,14 @@ class MCPServer:
                 "tools/call",
                 {"name": name, "arguments": arguments},
             )
+            # MCP tools/call returns: { content: [...], isError: bool }
+            # Normalize to our expected format
+            if isinstance(result, dict):
+                # Ensure we have content and exitCode
+                if "content" not in result:
+                    result["content"] = ""
+                if "exitCode" not in result:
+                    result["exitCode"] = 1 if result.get("isError", False) else 0
             return result
         except (ConnectionError, RuntimeError) as e:
             # Server may have crashed - try to reconnect
@@ -132,8 +140,11 @@ class MCPClient:
                 server = MCPServer(server_config, transport)
                 await server.connect()
                 self.servers[server_config.name] = server
+                logger.debug(f"Connected to MCP server '{server_config.name}': {len(server.tools)} tools discovered")
             except Exception as e:
                 logger.error(f"Failed to connect to MCP server {server_config.name}: {e}")
+                import traceback
+                logger.debug(traceback.format_exc())
                 # Continue with other servers even if one fails
 
     async def disconnect_all(self) -> None:

@@ -1,0 +1,34 @@
+{
+  "llm": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 8192
+  },
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "/path/to/allowed"]
+    }
+  },
+  "tool_defaults": {
+    "unknown_risk": "medium"
+  },
+  "escalation": {
+    "handler": "terminal",
+    "timeout_seconds": 300
+  },
+  "policy": {
+    "enterprise_url": null,
+    "refresh_interval_seconds": 60,
+    "agent_id": null,
+    "agent_tags": []
+  },
+  "api": {
+    "enabled": false,
+    "bind": "127.0.0.1:4830"
+  },
+  "chitin": {
+    "lib_path": null,
+    "sidecar_url": null
+  }
+}

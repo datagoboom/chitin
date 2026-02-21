@@ -116,8 +116,28 @@ class ToolExecutor:
         # Execute tool call
         try:
             result = await self.mcp.call_tool(tool_call.tool_name, tool_call.arguments)
-            result_content = result.get("content", "")
-            exit_code = result.get("exitCode", 0)
+            # Handle different result formats
+            if isinstance(result, dict):
+                result_content = result.get("content", "")
+                # Handle content as list (MCP format)
+                if isinstance(result_content, list):
+                    # Extract text from content blocks
+                    text_parts = []
+                    for item in result_content:
+                        if isinstance(item, dict):
+                            if item.get("type") == "text":
+                                text_parts.append(item.get("text", ""))
+                            else:
+                                text_parts.append(str(item))
+                        else:
+                            text_parts.append(str(item))
+                    result_content = "\n".join(text_parts)
+                elif not isinstance(result_content, str):
+                    result_content = str(result_content)
+                exit_code = result.get("exitCode", 0)
+            else:
+                result_content = str(result)
+                exit_code = 0
 
             # Record result in Chitin
             # event_id is the tool_call_id from the propose decision

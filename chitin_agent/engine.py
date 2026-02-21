@@ -41,16 +41,49 @@ class SessionManager:
         """Create a new session with a Chitin engine instance."""
         # Initialize Chitin engine
         # Engine takes config_path (optional) - policies are loaded from config path
-        config_path = None
+        import os
+        
+        # Prioritize native library over sidecar
+        # If lib_path is set, use it and clear sidecar_url to force native mode
         if self.config.chitin.lib_path:
-            # If lib_path is set, use it as config_path (or set env var)
-            import os
             os.environ["CHITIN_LIB_PATH"] = self.config.chitin.lib_path
-        if self.config.chitin.sidecar_url:
-            import os
+            # Clear sidecar URL to ensure native library is used
+            if "CHITIN_SIDECAR_URL" in os.environ:
+                del os.environ["CHITIN_SIDECAR_URL"]
+        elif self.config.chitin.sidecar_url:
+            # Only use sidecar if lib_path is not set
             os.environ["CHITIN_SIDECAR_URL"] = self.config.chitin.sidecar_url
-
-        engine = ChitinEngine(config_path=config_path)
+            # Clear lib_path to ensure sidecar is used
+            if "CHITIN_LIB_PATH" in os.environ:
+                del os.environ["CHITIN_LIB_PATH"]
+        else:
+            # Check environment variables
+            if os.getenv("CHITIN_LIB_PATH"):
+                # Native library available, clear sidecar
+                if "CHITIN_SIDECAR_URL" in os.environ:
+                    del os.environ["CHITIN_SIDECAR_URL"]
+            elif not os.getenv("CHITIN_SIDECAR_URL"):
+                # Try to use native library from wheel if available
+                # The chitin package should find it automatically
+                pass
+        
+        config_path = None
+        try:
+            engine = ChitinEngine(config_path=config_path)
+        except Exception as e:
+            # If initialization fails, provide helpful error
+            if "sidecar" in str(e).lower() or "http" in str(e).lower():
+                raise RuntimeError(
+                    f"Chitin engine initialization failed: {e}\n"
+                    "The engine is trying to use HTTP/sidecar mode.\n"
+                    "To use the native library:\n"
+                    "  1. Ensure chitin-engine-lib is installed with the native library\n"
+                    "  2. Unset CHITIN_SIDECAR_URL if it's set: unset CHITIN_SIDECAR_URL\n"
+                    "  3. The native library should be found automatically from the wheel\n"
+                    "\n"
+                    "See SETUP_CHITIN.md for more details."
+                ) from e
+            raise
 
         # Register tools from classifications
         tool_classifications = load_tool_classifications()
