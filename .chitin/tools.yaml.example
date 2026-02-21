@@ -1,0 +1,22 @@
+# Tool risk classifications
+# Tools not listed here get tool_defaults.unknown_risk from config
+
+tools:
+  filesystem_write:
+    risk: high
+    category: filesystem
+  filesystem_read:
+    risk: low
+    category: filesystem
+  http_fetch:
+    risk: high
+    category: network_outbound
+  web_search:
+    risk: medium
+    category: network_outbound
+  shell_exec:
+    risk: critical
+    category: code_exec
+  database_query:
+    risk: medium
+    category: database

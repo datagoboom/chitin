@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chitin-agent"
+version = "0.1.0"
+description = "AI agent runtime with Chitin security engine"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Chitin Team"}
+]
+dependencies = [
+    "chitin>=0.1.0",  # Python bindings from chitin-engine-lib
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "pyyaml>=6.0",
+    "anthropic>=0.18.0",
+    "mcp>=0.1.0",  # MCP client library
+    "aiohttp>=3.9.0",  # For SSE and HTTP transports
+    "sse-starlette>=1.8.0",  # For SSE parsing
+    "fastapi>=0.104.0",  # For Local API server
+    "uvicorn>=0.24.0",  # ASGI server for FastAPI
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+]
+
+[project.scripts]
+chitin-agent = "chitin_agent.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["chitin_agent*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+strict_optional = true
