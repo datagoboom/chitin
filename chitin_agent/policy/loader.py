@@ -39,24 +39,47 @@ class PolicyLoader:
         """
         # Load policy files in resolution order
         policy_files = find_policy_files()
+        
+        import sys
+        if policy_files:
+            print(f"[POLICIES] Loading {len(policy_files)} policy file(s): {[str(p) for p in policy_files]}", file=sys.stderr)
+        else:
+            print("[POLICIES] No policy files found. Using engine defaults (if any).", file=sys.stderr)
 
         for policy_file in policy_files:
             with open(policy_file, "r") as f:
                 policy_data = yaml.safe_load(f)
                 if policy_data:
+                    print(f"[POLICIES] Parsed policy from {policy_file}: {policy_data}", file=sys.stderr)
                     # Register policy with engine
                     # Note: Actual API depends on chitin-engine-lib implementation
                     # The engine may load policies automatically from files,
                     # or may require explicit registration. Adjust based on actual API.
-                    if hasattr(engine, "load_policy"):
-                        engine.load_policy(policy_data)
-                    # If policies are loaded automatically, this may be a no-op
+                    if hasattr(engine, "load_policies_yaml"):
+                        try:
+                            # Read the raw YAML string and pass to engine
+                            with open(policy_file, "r") as raw:
+                                yaml_str = raw.read()
+                            engine.load_policies_yaml(yaml_str)
+                            print(f"[POLICIES] Successfully loaded policy from {policy_file}", file=sys.stderr)
+                        except Exception as e:
+                            print(f"[POLICIES] ERROR loading policy from {policy_file}: {e}", file=sys.stderr)
+                            import traceback
+                            traceback.print_exc(file=sys.stderr)
+                    else:
+                        print(f"[POLICIES] WARNING: engine.load_policies_yaml() not found.", file=sys.stderr)
 
         # Load enterprise policies (highest priority)
         if enterprise_policies:
             for policy in enterprise_policies:
-                if hasattr(engine, "load_policy"):
-                    engine.load_policy(policy)
+                if hasattr(engine, "load_policies_yaml"):
+                    import json as _json
+                    # Enterprise policies come as dicts; wrap in YAML-compatible format
+                    yaml_str = yaml.dump({"policies": [policy]})
+                    try:
+                        engine.load_policies_yaml(yaml_str)
+                    except Exception as e:
+                        print(f"[POLICIES] ERROR loading enterprise policy: {e}", file=sys.stderr)
 
         # Register tool classifications
         for tool_name, classification in tool_classifications.items():
